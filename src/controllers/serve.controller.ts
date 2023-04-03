@@ -16,8 +16,9 @@ export async function serveFileHandler(ctx: OakContext<"/">) {
         ctx.response.status = resp.status;
 
         ctx.response.headers.set('content-type', contentType);
-        ctx.response.body = resp.body;
+        ctx.response.headers.set('content-length', resp.headers.get('content-length')!);
 
+        ctx.response.body = resp.body;
     } catch (error) {
         return handleHttpError(ctx.response, error);
     }
