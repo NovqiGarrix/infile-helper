@@ -30,7 +30,7 @@ export async function serveFileHandler(ctx: OakContext<"/">) {
 
 export async function serveGDriveFileHandler(ctx: OakContext<"/gdrive">) {
 
-    const { url } = getQuery(ctx);
+    const { url, filename } = getQuery(ctx);
 
     ctx.assert(url && typeof url === "string", Status.BadRequest, "Missing required query parameter 'url'");
     ctx.assert(isUrl(url), Status.BadRequest, "Invalid URL");
@@ -68,6 +68,10 @@ export async function serveGDriveFileHandler(ctx: OakContext<"/gdrive">) {
 
         if (contentLength) {
             ctx.response.headers.set('Content-Length', contentLength);
+        }
+
+        if (filename) {
+            ctx.response.headers.set('Content-Disposition', `attachment; filename="${filename}"`);
         }
 
         ctx.response.body = resp.body;
