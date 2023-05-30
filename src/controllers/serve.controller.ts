@@ -39,19 +39,36 @@ export async function serveGDriveFileHandler(ctx: OakContext<"/gdrive">) {
     const accessToken = urlInURL.searchParams.get('qat');
     ctx.assert(accessToken, Status.BadRequest, "Invalid URL");
 
+    urlInURL.searchParams.delete('qat');
+
     try {
 
-        const resp = await fetch(url, {
+        const resp = await fetch(urlInURL, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
             }
         });
 
-        const contentType = resp.headers.get('content-type')!;
+        if (!resp.ok) {
+            ctx.response.status = Status.BadRequest;
+            ctx.response.body = {
+                code: Status.BadRequest,
+                status: 'Bad Request',
+                errors: [{ error: 'Something went wrong.' }]
+            }
+            return;
+        }
 
         ctx.response.status = resp.status;
-        ctx.response.headers.set('content-type', contentType);
-        ctx.response.headers.set('content-length', resp.headers.get('content-length')!);
+
+        const contentType = resp.headers.get('content-type')!;
+        const contentLength = resp.headers.get('content-length');
+
+        ctx.response.headers.set('Content-Type', contentType);
+
+        if (contentLength) {
+            ctx.response.headers.set('Content-Length', contentLength);
+        }
 
         ctx.response.body = resp.body;
     } catch (error) {

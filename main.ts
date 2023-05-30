@@ -17,6 +17,7 @@ for (let systemSignal of signals) {
 
     Deno.addSignalListener(systemSignal as Deno.Signal, () => {
         logger.warning(`Received ${systemSignal}, exiting...`.toUpperCase());
+        Deno.exit(0);
     });
 }
 
